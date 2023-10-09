@@ -86,13 +86,11 @@ nmi:
   lda devexp, x 	; Load the hello message into SPR-RAM
   sta $2004
   inx
-  cpx #$20
+  cpx #$18
   bne @loop
   rti
 
 devexp:
-  .byte $00, $00, $00, $00 	; Why do I need these here?
-  .byte $00, $00, $00, $00
   .byte $6c, $04, $00, $68
   .byte $6c, $01, $00, $72
   .byte $6c, $05, $00, $7c
