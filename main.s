@@ -53,6 +53,14 @@ clear_memory:
 vblankwait2:
   bit $2002
   bpl vblankwait2
+; load sprites into ram
+  ldx #$00
+@next_sprite:
+  lda devexp, x
+  sta $0200, x
+  inx
+  cpx #$18
+  bne @next_sprite
 
 main:
 load_palettes:
@@ -66,7 +74,7 @@ load_palettes:
   lda palettes, x
   sta $2007
   inx
-  cpx #$20
+  cpx #$18
   bne @loop
 
 enable_rendering:
@@ -78,25 +86,114 @@ enable_rendering:
 forever:
   jmp forever
 
+;;;;;;;;;;;;;;;;;;;
+
 nmi:
-  inc $0000
   ldx #$00 	; Set SPR-RAM address to 0
   stx $2003 ; store value in X in location $2003
 @loop:
-  lda devexp, x 	; Load the hello message into SPR-RAM
+  lda $0200, x 	; Load the sprite info
   sta $2004
   inx
   cpx #$18
   bne @loop
+
+; latch controller
+  LDA #$01
+  STA $4016
+  LDA #$00
+  STA $4016       ; tell both the controllers to latch buttons
+
+  LDA $4016 ; player 1 - A
+  LDA $4016 ; player 1 - B
+  LDA $4016 ; player 1 - START
+  LDA $4016 ; player 1 - SELECT
+
+; Read Up
+  LDA $4016       ; player 1 - UP
+  AND #%00000001  ; only look at bit 0
+  BEQ ReadUDone   ; branch to ReadADone if button is NOT pressed (0)
+  LDA #$ff
+  STA $0218
+  JSR mvud
+ReadUDone:        ; handling this button is done
+
+; Read Down
+  LDA $4016
+  AND #%00000001
+  BEQ ReadDDone
+  LDA #$01
+  STA $0218
+  JSR mvud
+ReadDDone:
+
+; Read Left
+  LDA $4016
+  AND #%00000001
+  BEQ ReadLDone
+  LDA #$ff
+  STA $0218
+  JSR mvlr                ; add instructions here to do something when button IS pressed (1)
+ReadLDone:
+
+; Read Right
+  LDA $4016
+  AND #%00000001
+  BEQ ReadRDone
+  LDA #$01
+  STA $0218
+  JSR mvlr
+ReadRDone:
+
   rti
 
-devexp:
-  .byte $6c, $04, $00, $68
-  .byte $6c, $01, $00, $72
-  .byte $6c, $05, $00, $7c
-  .byte $6c, $01, $00, $86
-  .byte $6c, $06, $00, $90
-  .byte $6c, $07, $00, $9a
+;;;;;;;;;;;;;;;;;;;
+mvlr:
+  LDA $0203
+  CLC
+  ADC $0218
+  STA $0203
+  STA $020f
+
+  LDA $0207
+  CLC
+  ADC $0218
+  STA $0207
+  STA $0213
+
+  LDA $020b
+  CLC
+  ADC $0218
+  STA $020b
+  STA $0217
+  RTI
+
+mvud:
+  LDA $0200
+  CLC
+  ADC $0218
+  STA $0200
+  STA $0204
+  STA $0208
+
+  LDA $020c
+  CLC
+  ADC $0218
+  STA $020c
+  STA $0210
+  STA $0214
+
+  RTI
+
+;;;;;;;;;;;;;;;;;;;
+
+devexp: ; Y  CHR  ATTR   X
+  .byte $60, $00, $00, $68 ; 00-03
+  .byte $60, $01, $00, $71 ; 04-07
+  .byte $60, $06, $00, $7a ; 08-0b
+  .byte $69, $01, $00, $68 ; 0c-0f
+  .byte $69, $07, $00, $71 ; 10-13
+  .byte $69, $05, $00, $7a ; 14-17
 
 palettes:
   ; Background Palette
@@ -106,22 +203,15 @@ palettes:
   .byte $0f, $00, $00, $00
 
   ; Sprite Palette
-  .byte $0f, $20, $00, $00
+  .byte $0f, $16, $2a, $12
   .byte $0f, $00, $00, $00
   .byte $0f, $00, $00, $00
   .byte $0f, $00, $00, $00
 
 ; Character memory
 .segment "CHARS"
-  .byte %11000011	; H (00)
-  .byte %11000011
-  .byte %11000011
-  .byte %11111111
-  .byte %11111111
-  .byte %11000011
-  .byte %11000011
-  .byte %11000011
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
+  .byte $F8, $cc, $c6, $c6, $c6, $cc, $f8, $00	; D (00)
+  .byte $00, $30, $20, $21, $21, $23, $06, $7c
 
   .byte %11111111	; E (01)
   .byte %11111111
@@ -133,7 +223,17 @@ palettes:
   .byte %11111111
   .byte $00, $00, $00, $00, $00, $00, $00, $00
 
-  .byte %11000000	; L (02)
+  .byte %11000011	; H (02)
+  .byte %11000011
+  .byte %11000011
+  .byte %11111111
+  .byte %11111111
+  .byte %11000011
+  .byte %11000011
+  .byte %11000011
+  .byte $00, $00, $00, $00, $00, $00, $00, $00
+
+  .byte %11000000	; L (03)
   .byte %11000000
   .byte %11000000
   .byte %11000000
@@ -143,7 +243,7 @@ palettes:
   .byte %11111111
   .byte $00, $00, $00, $00, $00, $00, $00, $00
 
-  .byte %01111110	; O (03)
+  .byte %01111110	; O (04)
   .byte %11100111
   .byte %11000011
   .byte %11000011
@@ -153,17 +253,17 @@ palettes:
   .byte %01111110
   .byte $00, $00, $00, $00, $00, $00, $00, $00
 
-  .byte %11111100	; D (04)
+  .byte %11111110	; P (05)
+  .byte %11111111
+  .byte %11000011
+  .byte %11000011
+  .byte %11111111
   .byte %11111110
-  .byte %11000011
-  .byte %11000011
-  .byte %11000011
-  .byte %11000011
-  .byte %11000010
-  .byte %11111100
+  .byte %11000000
+  .byte %11000000
   .byte $00, $00, $00, $00, $00, $00, $00, $00
 
-  .byte %11000011	; V (05)
+  .byte %11000011	; V (06)
   .byte %11000011
   .byte %11000011
   .byte %11000011
@@ -173,7 +273,7 @@ palettes:
   .byte %00111100
   .byte $00, $00, $00, $00, $00, $00, $00, $00
 
-  .byte %11000011	; X (06)
+  .byte %11000011	; X (07)
   .byte %11000011
   .byte %11100111
   .byte %01111110
@@ -181,14 +281,4 @@ palettes:
   .byte %01111110
   .byte %11100111
   .byte %11000011
-  .byte $00, $00, $00, $00, $00, $00, $00, $00
-
-  .byte %11111110	; P (07)
-  .byte %11111111
-  .byte %11000011
-  .byte %11000011
-  .byte %11111111
-  .byte %11111110
-  .byte %11000000
-  .byte %11000000
   .byte $00, $00, $00, $00, $00, $00, $00, $00
