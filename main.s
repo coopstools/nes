@@ -13,8 +13,8 @@
   ;; External interrupt IRQ (unused)
   .addr 0
 
-; "nes" linker config requires a STARTUP section, even if it's empty
-.segment "STARTUP"
+; "nes" linker config requires a staRTUP section, even if it's empty
+.segment "staRTUP"
 
 ; Main code segment for the program
 .segment "CODE"
@@ -89,101 +89,7 @@ forever:
 ;;;;;;;;;;;;;;;;;;;
 
 nmi:
-  ldx #$00 	; Set SPR-RAM address to 0
-  stx $2003 ; store value in X in location $2003
-@loop:
-  lda $0200, x 	; Load the sprite info
-  sta $2004
-  inx
-  cpx #$18
-  bne @loop
-
-; latch controller
-  LDA #$01
-  STA $4016
-  LDA #$00
-  STA $4016       ; tell both the controllers to latch buttons
-
-  LDA $4016 ; player 1 - A
-  LDA $4016 ; player 1 - B
-  LDA $4016 ; player 1 - START
-  LDA $4016 ; player 1 - SELECT
-
-; Read Up
-  LDA $4016       ; player 1 - UP
-  AND #%00000001  ; only look at bit 0
-  BEQ ReadUDone   ; branch to ReadADone if button is NOT pressed (0)
-  LDA #$ff
-  STA $0218
-  JSR mvud
-ReadUDone:        ; handling this button is done
-
-; Read Down
-  LDA $4016
-  AND #%00000001
-  BEQ ReadDDone
-  LDA #$01
-  STA $0218
-  JSR mvud
-ReadDDone:
-
-; Read Left
-  LDA $4016
-  AND #%00000001
-  BEQ ReadLDone
-  LDA #$ff
-  STA $0218
-  JSR mvlr                ; add instructions here to do something when button IS pressed (1)
-ReadLDone:
-
-; Read Right
-  LDA $4016
-  AND #%00000001
-  BEQ ReadRDone
-  LDA #$01
-  STA $0218
-  JSR mvlr
-ReadRDone:
-
-  rti
-
-;;;;;;;;;;;;;;;;;;;
-mvlr:
-  LDA $0203
-  CLC
-  ADC $0218
-  STA $0203
-  STA $020f
-
-  LDA $0207
-  CLC
-  ADC $0218
-  STA $0207
-  STA $0213
-
-  LDA $020b
-  CLC
-  ADC $0218
-  STA $020b
-  STA $0217
-  RTI
-
-mvud:
-  LDA $0200
-  CLC
-  ADC $0218
-  STA $0200
-  STA $0204
-  STA $0208
-
-  LDA $020c
-  CLC
-  ADC $0218
-  STA $020c
-  STA $0210
-  STA $0214
-
-  RTI
+  .include "nmi_sub/intro.s"
 
 ;;;;;;;;;;;;;;;;;;;
 
