@@ -4,7 +4,7 @@ ldx #$00 	; Set SPR-RAM address to 0
   lda $0200, x 	; Load the sprite info
   sta $2004
   inx
-  cpx #$18
+  cpx #$20 ; end of sprite memory
   bne @loop
 
 ; latch controller
@@ -23,9 +23,9 @@ ldx #$00 	; Set SPR-RAM address to 0
   AND #%00000001  ; only look at bit 0
   BEQ ReadUDone   ; branch to ReadADone if button is NOT pressed (0)
   lda #$ff
-  sta $0218
+  sta $02fe
   lda #$00
-  sta $0219
+  sta $02ff
   jsr mvgen
 ReadUDone:        ; handling this button is done
 
@@ -34,9 +34,9 @@ ReadUDone:        ; handling this button is done
   AND #%00000001
   BEQ ReadDDone
   lda #$01
-  sta $0218
+  sta $02fe
   lda #$00
-  sta $0219
+  sta $02ff
   jsr mvgen
 ReadDDone:
 
@@ -45,9 +45,9 @@ ReadDDone:
   AND #%00000001
   BEQ ReadLDone
   lda #$ff
-  sta $0218
+  sta $02fe
   lda #$03
-  sta $0219
+  sta $02ff
   jsr mvgen
 ReadLDone:
 
@@ -56,9 +56,9 @@ ReadLDone:
   AND #%00000001
   BEQ ReadRDone
   lda #$01
-  sta $0218
+  sta $02fe
   lda #$03
-  sta $0219
+  sta $02ff
   jsr mvgen
 ReadRDone:
 

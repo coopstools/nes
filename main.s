@@ -59,7 +59,7 @@ vblankwait2:
   lda devexp, x
   sta $0200, x
   inx
-  cpx #$18
+  cpx #$20
   bne @next_sprite
 
 main:
@@ -94,12 +94,14 @@ nmi:
 ;;;;;;;;;;;;;;;;;;;
 
 devexp: ; Y  CHR  ATTR   X
-  .byte $60, $03, $00, $68 ; 00-03
+  .byte $60, $07, $00, $68 ; 00-03
   .byte $60, $04, $00, $71 ; 04-07
-  .byte $60, $15, $00, $7a ; 08-0b
-  .byte $69, $04, $00, $68 ; 0c-0f
-  .byte $69, $17, $00, $71 ; 10-13
-  .byte $69, $0f, $00, $7a ; 14-17
+  .byte $60, $0b, $00, $7a ; 08-0b
+  .byte $60, $0b, $00, $84 ; 0c-0f
+  .byte $69, $0e, $00, $68 ; 10-13
+  .byte $69, $11, $00, $71 ; 14-17
+  .byte $69, $0b, $00, $7a ; 18-1b
+  .byte $69, $03, $00, $84 ; 1c-1f
 
 ; Character memory
 .include "sprite.s"
