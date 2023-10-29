@@ -56,10 +56,10 @@ vblankwait2:
 ; load sprites into ram
   ldx #$00
 @next_sprite:
-  lda devexp, x
+  lda hellorld, x
   sta $0200, x
   inx
-  cpx #$20
+  cpx #$24 ; end of sprite memory; should match line 7 intro.s
   bne @next_sprite
 
 main:
@@ -93,15 +93,16 @@ nmi:
 
 ;;;;;;;;;;;;;;;;;;;
 
-devexp: ; Y  CHR  ATTR   X
-  .byte $60, $07, $00, $68 ; 00-03
-  .byte $60, $04, $00, $71 ; 04-07
-  .byte $60, $0b, $00, $7a ; 08-0b
-  .byte $60, $0b, $00, $84 ; 0c-0f
-  .byte $69, $0e, $00, $68 ; 10-13
-  .byte $69, $11, $00, $71 ; 14-17
-  .byte $69, $0b, $00, $7a ; 18-1b
-  .byte $69, $03, $00, $84 ; 1c-1f
+hellorld: ; Y  CHR  ATTR   X
+  .byte $60, $07, $00, $68 ; 00-03 H
+  .byte $60, $04, $00, $71 ; 04-07 E
+  .byte $60, $0b, $00, $7a ; 08-0b L
+  .byte $60, $0b, $00, $83 ; 0c-0f L
+  .byte $60, $0e, $00, $8c ; 10-13 O
+  .byte $69, $11, $00, $7a ; 14-17 R
+  .byte $69, $0b, $00, $83 ; 18-1b L
+  .byte $69, $03, $00, $8c ; 1c-1f D
+  .byte $69, $1a, $00, $95 ; 20-23
 
 ; Character memory
 .include "sprite.s"

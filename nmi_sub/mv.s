@@ -1,5 +1,5 @@
   ldx $02ff     ; determines whether X or Y is updated (0 for Y, 3 for X
-  ldy #$08      ; determines how many sprites are updated
+  ldy #$09      ; determines how many sprites are updated
 @inner_mvgen:
   lda $0200, x
   clc

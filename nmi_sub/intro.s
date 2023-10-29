@@ -4,7 +4,7 @@ ldx #$00 	; Set SPR-RAM address to 0
   lda $0200, x 	; Load the sprite info
   sta $2004
   inx
-  cpx #$20 ; end of sprite memory
+  cpx #$24 ; end of sprite memory
   bne @loop
 
 ; latch controller
