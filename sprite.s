@@ -6,10 +6,10 @@ palettes:
   .byte $0f, $00, $00, $00
 
   ; Sprite Palette
-  .byte $0f, $16, $01, $00
-  .byte $0f, $21, $12, $00
-  .byte $0f, $00, $00, $00
-  .byte $0f, $00, $00, $00
+  .byte $0f, $16, $01, $0f
+  .byte $0f, $21, $12, $0f
+  .byte $0f, $20, $2a, $0f
+  .byte $0f, $29, $09, $0f
 
 .segment "CHARS"
 

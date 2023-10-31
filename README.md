@@ -15,3 +15,10 @@ In the IDE, I normally setup a shell script that runs the command:
 cl65 main.s --verbose --target nes -o demo.nes && fceux demo.nes --fullscreen 1
 ```
 Pretty simply, this builds the source code in `main.s`, and outputs an NES rom to `demo.nes`. It then starts up an instance of `fceux` running the demo.nes rom.
+
+# Internals
+
+## Reserved Global Memory
+| location | scope        | description |
+| --- |--------------| --- |
+| $02fd | intro screen | number of spites grouped in logo

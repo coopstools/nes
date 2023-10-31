@@ -1,10 +1,10 @@
-ldx #$00 	; Set SPR-RAM address to 0
+  ldx #$00 	; Set SPR-RAM address to 0
   stx $2003 ; store value in X in location $2003
 @loop:
   lda $0200, x 	; Load the sprite info
   sta $2004
   inx
-  cpx #$24 ; end of sprite memory
+  cpx $02fd
   bne @loop
 
 ; latch controller
@@ -13,7 +13,13 @@ ldx #$00 	; Set SPR-RAM address to 0
   lda #$00
   sta $4016       ; tell both the controllers to latch buttons
 
+;ReadA
   lda $4016 ; player 1 - A
+  AND #%00000001
+  BEQ ReadADone
+  .include "color.s"
+ReadADone:
+
   lda $4016 ; player 1 - B
   lda $4016 ; player 1 - staRT
   lda $4016 ; player 1 - SELECT

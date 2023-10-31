@@ -55,11 +55,13 @@ vblankwait2:
   bpl vblankwait2
 ; load sprites into ram
   ldx #$00
+  lda #$24 ; end of sprite memory
+  sta $02fd
 @next_sprite:
   lda hellorld, x
   sta $0200, x
   inx
-  cpx #$24 ; end of sprite memory; should match line 7 intro.s
+  cpx $02fd
   bne @next_sprite
 
 main:
@@ -102,7 +104,7 @@ hellorld: ; Y  CHR  ATTR   X
   .byte $69, $11, $00, $7a ; 14-17 R
   .byte $69, $0b, $00, $83 ; 18-1b L
   .byte $69, $03, $00, $8c ; 1c-1f D
-  .byte $69, $1a, $00, $95 ; 20-23
+  .byte $69, $1a, $00, $95 ; 20-23 !
 
 ; Character memory
 .include "sprite.s"
